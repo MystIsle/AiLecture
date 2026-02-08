@@ -7,12 +7,12 @@
 #include "AiLectureCharacter.generated.h"
 
 UCLASS(Blueprintable)
-class AAiLectureCharacter : public ACharacter
+class AALCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
 public:
-	AAiLectureCharacter();
+	AALCharacter();
 
 	// Called every frame.
 	virtual void Tick(float DeltaSeconds) override;

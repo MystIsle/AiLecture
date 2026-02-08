@@ -11,7 +11,7 @@
 #include "Materials/Material.h"
 #include "Engine/World.h"
 
-AAiLectureCharacter::AAiLectureCharacter()
+AALCharacter::AALCharacter()
 {
 	// Set size for player capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -45,7 +45,7 @@ AAiLectureCharacter::AAiLectureCharacter()
 	PrimaryActorTick.bStartWithTickEnabled = true;
 }
 
-void AAiLectureCharacter::Tick(float DeltaSeconds)
+void AALCharacter::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
 }
