@@ -50,6 +50,8 @@ protected:
 	
 	// To add mapping context
 	virtual void BeginPlay();
+	
+	void DrawFollowingPath(float LifeTime = 2.0f);
 
 	/** Input handlers for SetDestination action. */
 	void OnInputStarted();

@@ -11,6 +11,7 @@
 #include "InputActionValue.h"
 #include "EnhancedInputSubsystems.h"
 #include "Engine/LocalPlayer.h"
+#include "Navigation/PathFollowingComponent.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -60,6 +61,63 @@ void AAiLecturePlayerController::SetupInputComponent()
 	}
 }
 
+
+void AAiLecturePlayerController::DrawFollowingPath(float LifeTime /*= 2.0f*/)
+{
+#if ENABLE_DRAW_DEBUG
+	UPathFollowingComponent* PathComp = FindComponentByClass<UPathFollowingComponent>();
+	if (!PathComp)
+	{
+		return;
+	}
+
+	FNavPathSharedPtr Path = PathComp->GetPath();
+	if (!Path.IsValid() || !Path->IsValid())
+	{
+		return;
+	}
+
+	const TArray<FNavPathPoint>& Points = Path->GetPathPoints();
+	for (int32 i = 0; i < Points.Num() - 1; ++i)
+	{
+		DrawDebugLine(
+			GetWorld(),
+			Points[i].Location,
+			Points[i + 1].Location,
+			FColor::Green,
+			false,
+			LifeTime,
+			0,
+			3.0f
+		);
+
+		DrawDebugSphere(
+			GetWorld(),
+			Points[i].Location,
+			15.0f,
+			8,
+			FColor::Yellow,
+			false,
+			LifeTime
+		);
+	}
+
+	// 최종 목적지 표시
+	if (Points.Num() > 0)
+	{
+		DrawDebugSphere(
+			GetWorld(),
+			Points.Last().Location,
+			25.0f,
+			12,
+			FColor::Red,
+			false,
+			LifeTime
+		);
+	}
+#endif
+}
+
 void AAiLecturePlayerController::OnInputStarted()
 {
 	StopMovement();
@@ -105,6 +163,7 @@ void AAiLecturePlayerController::OnSetDestinationReleased()
 	{
 		// We move there and spawn some particles
 		UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, CachedDestination);
+		DrawFollowingPath(3);
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, FXCursor, CachedDestination, FRotator::ZeroRotator, FVector(1.f, 1.f, 1.f), true, true, ENCPoolMethod::None, true);
 	}
 
