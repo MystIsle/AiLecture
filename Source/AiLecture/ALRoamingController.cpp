@@ -1,5 +1,6 @@
 // ALRoamingController.cpp
 #include "ALRoamingController.h"
+#include "ALAIDebugLibrary.h"
 #include "NavigationSystem.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -14,9 +15,7 @@ void AALRoamingController::OnPossess(APawn* InPawn)
 
 	if (InPawn)
 	{
-		UE_LOG(LogTemp, Warning,
-			TEXT("[AI] Controller is now controlling: %s"),
-			*InPawn->GetName());
+		UE_LOG(LogTemp, Warning, TEXT("[AI] Controller is now controlling: %s"), *InPawn->GetName());
 	}
 
 	// 이동 방향으로 캐릭터 회전
@@ -42,12 +41,17 @@ void AALRoamingController::OnPossess(APawn* InPawn)
 
 void AALRoamingController::MoveToRandomLocation()
 {
-	APawn* MyPawn = GetPawn();
-	if (!MyPawn) return;
+	const APawn* MyPawn = GetPawn();
+	if (MyPawn == nullptr)
+	{
+		return;
+	}
 
-	UNavigationSystemV1* NavSystem =
-		UNavigationSystemV1::GetCurrent(GetWorld());
-	if (!NavSystem) return;
+	const UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(GetWorld());
+	if (NavSystem == nullptr)
+	{
+		return;
+	}
 
 	FNavLocation RandomLocation;
 	bool bFound = NavSystem->GetRandomReachablePointInRadius(
@@ -59,5 +63,6 @@ void AALRoamingController::MoveToRandomLocation()
 	if (bFound)
 	{
 		MoveToLocation(RandomLocation.Location);
+		UALAIDebugLibrary::DrawFollowingPath(this);
 	}
 }

@@ -19,8 +19,8 @@ protected:
 private:
 	void MoveToRandomLocation();
 
-	FTimerHandle RandomMoveTimer;
-
 	UPROPERTY(EditAnywhere, Category = "AI")
 	float MoveRadius = 1000.0f;
+	
+	FTimerHandle RandomMoveTimer;
 };
