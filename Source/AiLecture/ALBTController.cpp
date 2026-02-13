@@ -4,11 +4,15 @@
 
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Perception/AIPerceptionComponent.h"
+#include "Perception/AISense_Hearing.h"
+#include "Perception/AISense_Sight.h"
+
 
 AALBTController::AALBTController()
 {
 	AIPerceptionComp = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerception"));
 }
+
 void AALBTController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -32,20 +36,31 @@ void AALBTController::OnPossess(APawn* InPawn)
 
 void AALBTController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
-	UBlackboardComponent* BlackboardComp = GetBlackboardComponent();
-	if (BlackboardComp == nullptr)
+	if (Stimulus.Type == UAISense::GetSenseID<UAISense_Sight>())
 	{
+		// 눈으로 봤다 → 직접 추적
+		if (Stimulus.WasSuccessfullySensed())
+		{
+			GetBlackboardComponent()->SetValueAsObject(TEXT("TargetActor"), Actor);
+            
+			// 적을 직접 봤으므로 소리 조사 취소
+			GetBlackboardComponent()->ClearValue(TEXT("HearingLocation"));
+		}
+		else
+		{
+			GetBlackboardComponent()->ClearValue(TEXT("TargetActor"));
+		}
 		return;
 	}
-
-	if (Stimulus.WasSuccessfullySensed())
+    
+	if (Stimulus.Type == UAISense::GetSenseID<UAISense_Hearing>())
 	{
-		// 감지 성공 → Blackboard에 타겟 저장
-		BlackboardComp->SetValueAsObject(TEXT("TargetActor"), Actor);
-	}
-	else
-	{
-		// 감지 이탈 → 타겟 해제
-		BlackboardComp->ClearValue(TEXT("TargetActor"));
+		// 소리를 들었다 → 소리 위치로 조사
+		if (Stimulus.WasSuccessfullySensed())
+		{
+			GetBlackboardComponent()->SetValueAsVector(
+				TEXT("HearingLocation"), Stimulus.StimulusLocation);
+		}
+		return;
 	}
 }
